@@ -1,0 +1,13 @@
+req:
+  host: "lm-account-syapi.us-e2.cloudhub.io"
+  host1: "lm-firstlook-country-sapi.us-e2.cloudhub.io"
+  port: "443"
+  base: "api"
+  path: "/accounts/{accountid}"
+  path1: "/countries/{isocode}"
+  path2: "/accounts"
+  id: "![ncl728MIeHfi0E2Z4YGYW0w5QFl0yhR6HF7wtpUWd3Yb4IShaq/9sqsBIsu7FE3t]"
+  secret: "![y5lbkfco3FOPu2ukrSQlvChrgsitFyBGjKuzaRzxVaKzhaNUK+M8KLsUWfaMF5Wf]"
+  jkspath:  "trustStore.jks"
+  password: "![E/uk21EyAACSASEU29q5Gg==]"
+  

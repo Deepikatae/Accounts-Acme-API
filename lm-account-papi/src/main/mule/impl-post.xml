@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="post:\accounts:application\json:accounts-papi-config-impl" doc:id="ff6531da-2dc8-4ce0-8be8-62c3eb6fb617">
+		<logger level="INFO" doc:name="Flow Started Logger" doc:id="d4009492-7af1-4510-a4d6-32a7141e35bb" message='#[vars.id]"flow started"' />
+		<set-variable value="#[payload]" doc:name="Set Variable for orginal payload" doc:id="e57d5af3-dbd1-4bc1-8f63-f5d7c134a23f" variableName="payload" />
+		<set-variable value="#[payload.billingAddress.countryIso]" doc:name="Set Variable for isocode" doc:id="f8470e20-fbf6-4720-8562-cf17d2628ae4" variableName="iso" />
+		<http:request method="GET" doc:name="Request_firstlookup" doc:id="f96061b1-40b8-44b8-b911-857491b1b1c1" config-ref="HTTP_Request_configuration_firstcountlookup" path="${req.path1}" target="response" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id" : p("req.id"),
+	"client_secret": p("req.secret"),
+	"correlationid": vars.id
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"isocode" : vars.iso
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Mapping" doc:id="d0eccbe8-f038-45e0-82f3-b39352609638" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "name": vars.payload.name,
+  "email": vars.payload.email,
+  "number": vars.payload.number,
+  "phone": vars.payload.phone,
+  "fax": vars.payload.fax,
+  "billingAddress": {
+  	"country": vars.response.country,
+    "street": vars.payload.billingAddress.street,
+    "city": vars.payload.billingAddress.city,
+    "state": vars.payload.billingAddress.state,
+    "postalCode": vars.payload.billingAddress.postalCode,
+    "countryIso": vars.response.iso
+  },
+  "shippingAddress": {
+  	"country": vars.response.country,
+    "street": vars.payload.shippingAddress.street,
+    "city": vars.payload.shippingAddress.city,
+    "state": vars.payload.shippingAddress.state,
+    "postalCode": vars.payload.shippingAddress.postalCode,
+    "countryIso": vars.response.iso
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request call for sapi" doc:id="3b5f6231-9aaf-452b-807d-76aa1f26dd06" config-ref="HTTP_Request_configuration" path="${req.path2}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id" : p("req.id"),
+	"client_secret": p("req.secret"),
+	"correlationid": vars.id
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="6668f64f-edbc-41f5-a4ed-e236c509b044" message='#[vars.id]"flow started"' />
+		<error-handler ref="globalError_Handler" />
+    </flow>
+	</mule>

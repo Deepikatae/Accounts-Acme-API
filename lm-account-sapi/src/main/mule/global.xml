@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<import doc:name="Import" doc:id="a5063fd9-c316-43c7-a651-edf389fb2af7" file="lm-errorhandling.xml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="0b44ba31-0cc3-4b08-8e56-52e396698280" file="config-properties.yaml" />
+	<api-gateway:autodiscovery apiId="19386330" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="564a6120-5e03-4414-bc87-05681706db90" flowRef="accounts-sfdc-sapi-main" />
+	<global-property doc:name="Global Property" doc:id="524928b3-5dd0-44b2-9e3d-a5aa3f006373" name="key" value="TrainingMule@123" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="7a5658c4-85ed-45d7-8880-5b369cda119e" file="${dev}" key="${key}" />
+	<global-property doc:name="Global Property" doc:id="d1638ccb-a2c3-4807-b133-a07b8c9d0df6" name="dev" value="config-properties.yaml" />
+</mule>

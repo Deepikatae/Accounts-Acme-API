@@ -1,0 +1,23 @@
+{
+  "number": "elit,",
+  "phone": "(225)-280-2821",
+  "name": "Casey",
+  "shippingAddress": {
+    "country": "Gambia",
+    "city": "Chicago",
+    "countryIso": "Dominica",
+    "street": "Golden Gate Ave 28",
+    "postalCode": "et",
+    "state": "nostrud"
+  },
+  "billingAddress": {
+    "country": "Finland",
+    "city": "Houston",
+    "countryIso": "Russia",
+    "street": "Geary St 92",
+    "postalCode": "voluptate",
+    "state": "non"
+  },
+  "fax": "(546)-234-6303",
+  "email": "Ali.Mendez@gmail.com"
+}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="get:\accounts\(accountid):accounts-sfdc-sapi-config-impl-get" doc:id="d8dff46b-6257-423c-9ea4-0694546e7144" >
+		<logger level="INFO" doc:name="Flow Started Logger" doc:id="78949f87-0c9b-49bb-a0b0-90be93b8973c" message='#[vars.id]"flow started"' />
+		<ee:transform doc:name="Transform Message" doc:id="cf015375-7df6-4f1f-91ad-24d29155149d" >
+			<ee:variables >
+				<ee:set-variable variableName="accountid" ><![CDATA[attributes.uriParams.'accountid']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="3d607b5d-9a4d-4277-806d-0503cedf832e" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[select Name,Phone,Fax,Email__c,	AccountId__c,BillingAddress from Account where Id =':accountid__c']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	accountid__c : vars.accountid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message1" doc:id="b2725aaf-fcb4-4bd4-ab8a-5a074ee86621" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="8f194e76-4153-41cd-992d-bf902f7ae177" message='#[vars.id]"flow started"' />
+	</flow>
+</mule>

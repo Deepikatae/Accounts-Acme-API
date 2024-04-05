@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+    <http:listener-config name="accounts-papi-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="accounts-papi-config" api="resource::a63ac463-c1e3-4eea-8f3c-128c5fa152aa:lm_account_papi:1.0.1:raml:zip:accounts-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="0527f3fc-68b4-4b5f-b3ff-ef2c68bf8634" basePath="/${req.base}" >
+		<http:request-connection host="${req.host}" port="${req.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store path="${req.jkspath}" password="${secure::req.password}" type="jks" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration_firstcountlookup" doc:name="HTTP Request configuration" doc:id="75ce7c33-560c-4103-80af-882e30e59f6a" basePath="/${req.base}" >
+		<http:request-connection host="${req.host1}" port="${req.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store path="${req.jkspath}" password="${secure::req.password}" type="jks" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<flow name="accounts-papi-main">
+        <http:listener config-ref="accounts-papi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[attributes.headers.correlationid]" doc:name="Set Variable for correlationid" doc:id="299ba17f-8146-47e7-8595-710028e87cb2" variableName="id"/>
+		<apikit:router config-ref="accounts-papi-config" doc:id="8562d710-c254-44e1-a2b5-ac9703474893"/>
+        <error-handler ref="globalError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="accounts-papi-console">
+        <http:listener config-ref="accounts-papi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accounts-papi-config" />
+        <error-handler ref="globalError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="put:\accounts\(accountid):application\json:accounts-papi-config">
+		<flow-ref doc:name="Flow Reference" doc:id="99191317-2eee-4e30-a749-f6d3c53a3642" name="put:\accounts\(accountid):application\json:accounts-papi-config-impl"/>
+		<error-handler ref="globalError_Handler" />
+    </flow>
+    <flow name="post:\accounts:application\json:accounts-papi-config">
+		<flow-ref doc:name="Flow Reference" doc:id="e17643c2-cba0-4aba-bea5-62e1937129be" name="post:\accounts:application\json:accounts-papi-config-impl"/>
+		<error-handler ref="globalError_Handler" />
+    </flow>
+</mule>

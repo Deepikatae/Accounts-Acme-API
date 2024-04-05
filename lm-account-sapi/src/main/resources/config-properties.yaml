@@ -1,0 +1,17 @@
+sal:
+  user: "deepika.arthanarieswaran-lgyj@force.com"
+  pass:  "de@EP2ika4"
+  security: "pUNbKLRBujqbQtQTfxLh24IxA"
+  url: "https://login.salesforce.com/services/Soap/u/56.0"
+https:
+  host: "0.0.0.0"
+  port: "8082"
+  timeout: "30000"
+  path: "/api/*"
+  jkspath: "sdfc.jks"
+  alias: "mule"
+  keypass: "![E/uk21EyAACSASEU29q5Gg==]"
+  password: "![E/uk21EyAACSASEU29q5Gg==]"
+  pass: "Saran@2005"
+  
+  

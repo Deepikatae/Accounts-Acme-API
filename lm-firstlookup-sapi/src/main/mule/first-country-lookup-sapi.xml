@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+    <http:listener-config name="first-country-lookup-sapi-httpListenerConfig">
+        <http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS" readTimeout="${https.timeout}" tlsContext="TLS_Context"/>
+    </http:listener-config>
+    <apikit:config name="first-country-lookup-sapi-config" api="resource::a63ac463-c1e3-4eea-8f3c-128c5fa152aa:lm-firstlook-sapi:1.0.0:raml:zip:first-country-lookup-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <api-gateway:autodiscovery apiId="19382359" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="28d121bf-8455-4e8f-a526-be2b48f4e3db" flowRef="first-country-lookup-sapi-main" />
+	<flow name="first-country-lookup-sapi-main">
+        <http:listener config-ref="first-country-lookup-sapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[attributes.headers.correlationid]" doc:name="Set Variable for correlationid" doc:id="ed28172a-cea7-4fc4-9906-0a4acbad67f9" variableName="id"/>
+		<apikit:router config-ref="first-country-lookup-sapi-config" doc:id="d0524ecb-d2a8-428e-b4c8-1b4f8950b5cc"/>
+        <error-handler ref="lm-errorhandlingError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="first-country-lookup-sapi-console">
+        <http:listener config-ref="first-country-lookup-sapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="first-country-lookup-sapi-config" />
+        <error-handler ref="lm-errorhandlingError_Handler">        
+        </error-handler>
+    </flow>
+    <flow name="get:\countries:first-country-lookup-sapi-config">
+        <logger level="INFO" doc:name="Flow Started Logger" doc:id="6e9c103c-626e-4dd6-be67-779d44137366" message='#[vars.id]"flow started"' />
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+[
+  {
+    country: "India",
+    region: "Asia",
+    iso: "IN"
+  }, 
+  {
+    country: "Ghana",
+    region: "Africa",
+    iso: "GH"
+  }
+&#93; as Array {encoding: "UTF-8", mediaType: "application/json"}&#93;&#93;></ee:set-payload>
+            </ee:message>
+        </ee:transform> [STUDIO] -->
+		<http:request method="GET" doc:name="Request call to get -/countries" doc:id="0d302c12-280c-4dc3-9ae7-bc423f3074a2" url="${req.url}"/>
+		<ee:transform doc:name="payload" doc:id="ceca40e4-5b8f-413b-a1af-11b7d1ba6659" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="7613f401-f0bb-417a-9c62-64595694916b" message='#[vars.id]"flow started"' />
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+    <flow name="get:\countries\(isocode):first-country-lookup-sapi-config">
+        <logger level="INFO" doc:name="Flow Started Logger" doc:id="f8c7dc0d-598b-46cc-ab79-99667b715035" message='#[vars.id]"flow started"'/>
+		<ee:transform doc:name="set variable">
+            <ee:variables>
+                <ee:set-variable variableName="isocode">attributes.uriParams.'isocode'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <http:request method="GET" doc:name="Request call to get -/countries/isocode" doc:id="52df8545-09db-40ca-bbde-7d4fb96d24da" url="${req.url}" />
+		<ee:transform doc:name="payload" doc:id="f41b0b13-2b53-4f10-a0d7-43ebb9405d15" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data filterObject ((value, key) -> key startsWith vars.isocode ) mapObject ((v, k, i) ->            
+   { 
+    "country": v.country,
+    "region": v.region,
+    "iso" : vars.isocode
+   })]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+  country: "India",
+  region: "Asia",
+  iso: "IN"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}&#93;&#93;></ee:set-payload>
+            </ee:message>
+        </ee:transform> [STUDIO] -->
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="aadd1743-efb7-4a07-a363-c90053061445" message='#[vars.id]"flow started"' />
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+</mule>

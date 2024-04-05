@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<global-property doc:name="Global Property" doc:id="e85cc405-1b59-418a-9a19-57251b37660a" name="dev" value="config-properties.yaml" />
+	<global-property doc:name="Global Property" doc:id="444cca99-233f-4be8-8741-070c3a20dc17" name="key" value="TrainingMule@123" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="7b7456da-579c-4a39-a8a5-e5d3e2dd1157" file="${dev}" key="${key}" />
+	<configuration-properties doc:name="Configuration properties" doc:id="1bc29198-4d62-4809-a1b0-2cb632529992" file="${dev}" />
+	<error-handler name="globalError_Handler" doc:id="54edeeec-b486-4411-b6fe-7b34a99f23e2" >
+	 <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4b8a71b9-be85-405f-9758-4498a583b2e0" type="ANY">
+			<set-variable value="#[error.muleMessage.attributes.StatusCode default 501]" doc:name="Set Variable" doc:id="e3420233-7f83-4f4b-9218-fde5c3e68e04" variableName="httpStatus" />
+			<ee:transform doc:name="Transform Message" doc:id="666b60e6-803d-4d86-b963-a3e9fe6e9b04" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[output application/json skipNullOn = "everywhere"
+---
+{
+    "status": vars.httpStatus,
+    "x-correlation-id": correlationId,
+    "message": if (error.errorMessage.payload.message != null ) error.errorMessage.payload.message else error.errorType.identifier
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[501]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Error Logger" doc:id="56333881-84d8-419f-b2f1-4e97d37bbcdf" message="#[payload]" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

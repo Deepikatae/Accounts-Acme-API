@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<api-gateway:autodiscovery apiId="19382442" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="76361fe2-a947-45e0-9db9-67f8b85f9ac8" flowRef="accounts-papi-main" />
+	<global-property doc:name="Global Property" doc:id="2ca2ae7d-c295-405b-8a25-30b3cbf243e1" name="dev" value="config-properties.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="aed36429-c09b-4df9-95e0-cf523f243ada" file="${dev}" />
+	<global-property doc:name="Global Property" doc:id="b09f8821-0af8-45ff-8252-a5653d409d68" name="key" value="TrainingMule@123" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="3091c7f0-6ee8-4745-8073-5fa7516f5841" file="${dev}" key="${key}" />
+	<error-handler name="globalError_Handler" doc:id="7e46eff0-cf16-4072-ba06-25771007bfb1" >
+	 <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="47caad43-af4b-416e-8613-92805b85a804" type="ANY">
+			<set-variable value="#[error.muleMessage.attributes.StatusCode default 501]" doc:name="Set Variable" doc:id="6df38152-8845-40f7-b823-576e977239ff" variableName="httpStatus" />
+			<ee:transform doc:name="Transform Message" doc:id="5a91976d-179d-4e9f-9541-7c8b1f3665fe" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[output application/json skipNullOn = "everywhere"
+---
+{
+    "status": vars.httpStatus,
+    "x-correlation-id": correlationId,
+    "message": if (error.errorMessage.payload.message != null ) error.errorMessage.payload.message else error.errorType.identifier
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[501]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Error Logger" doc:id="7b59b205-d594-495b-a322-d0804b79c9f6" message="#[payload]" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

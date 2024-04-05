@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<import doc:name="Import" doc:id="3c068b18-4883-4373-b8d2-7a5f384d6af2" file="lm-errorhandling.xml" />
+	<global-property doc:name="Global Property" doc:id="edbc14ed-4800-4fb1-8e9f-b90fb916c77d" name="dev" value="configure.properties" />
+	<configuration-properties doc:name="Configuration properties" doc:id="1def9f81-f222-4637-b661-14fa8887f20a" file="${dev}.yaml" />
+	<global-property doc:name="Global Property" doc:id="e6beb7b2-5655-46ef-9799-e7dfd904e510" name="key" value="TrainingMule@123" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="8ea863cf-800c-4d66-a885-6518f93cdf34" file="${dev}.yaml" key="${key}" />
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="4b594d74-565e-48a2-ab61-f136e0856109" >
+		<tls:key-store type="jks" path="${https.jkspath}" alias="${https.alias}" keyPassword="${secure::https.password}" password="${secure::https.password}" />
+	</tls:context>
+</mule>

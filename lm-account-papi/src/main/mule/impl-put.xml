@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="put:\accounts\(accountid):application\json:accounts-papi-config-impl" doc:id="ff69b461-79fd-4389-85a1-b2d66b73b777">
+        <!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="accountid">attributes.uriParams.'accountid'</ee:set-variable>
+            </ee:variables>
+        </ee:transform> [STUDIO] -->
+        <!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+  id: "0015j00000VNSljAAH",
+  status: 0,
+  message: "Account updated successfully"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}&#93;&#93;></ee:set-payload>
+            </ee:message>
+        </ee:transform> [STUDIO] -->
+        <logger level="INFO" doc:name="Flow Started Logger" doc:id="fc623680-04a9-48b9-a545-a8f1fcba5f91" message='#[vars.id]"flow started"' />
+		<set-variable value="#[payload]" doc:name="Set Variable for orginal payload" doc:id="da191044-54fa-467e-bc55-780c8eefb8f4" variableName="payload" />
+		<set-variable value="#[attributes.uriParams.accountid]" doc:name="Set Variable for uriparameter" doc:id="17e67716-587a-4805-bc8e-5f5fb1a20396" variableName="accountid"/>
+		<set-variable value="#[payload.billingAddress.countryIso]" doc:name="Set Variable for isocode" doc:id="c162fa9c-6554-41ce-8109-7d7e0ca23031" variableName="iso"/>
+		<http:request method="GET" doc:name="Request_firstlookup" doc:id="0614c4ad-b248-4a0a-9822-e9e252730faa" config-ref="HTTP_Request_configuration_firstcountlookup" path="${req.path1}" target="response">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"client_id" : p("req.id"),
+	"client_secret": p("req.secret"),
+	"correlationid": vars.id
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"isocode" : vars.iso
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Mapping" doc:id="ae5800d8-2072-4d3f-a398-f80860bb87d1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "name": vars.payload.name,
+  "email": vars.payload.email,
+  "number": vars.payload.number,
+  "phone": vars.payload.phone,
+  "fax": vars.payload.fax,
+  "billingAddress": {
+  	"country": vars.response.country,
+    "street": vars.payload.billingAddress.street,
+    "city": vars.payload.billingAddress.city,
+    "state": vars.payload.billingAddress.state,
+    "postalCode": vars.payload.billingAddress.postalCode,
+    "countryIso": vars.response.iso
+  },
+  "shippingAddress": {
+  	"country": vars.response.country,
+    "street": vars.payload.shippingAddress.street,
+    "city": vars.payload.shippingAddress.city,
+    "state": vars.payload.shippingAddress.state,
+    "postalCode": vars.payload.shippingAddress.postalCode,
+    "countryIso": vars.response.iso
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="PUT" doc:name="Request call sapi" doc:id="d7b5f9f9-462a-429d-af8c-dab1150d4969" path="${req.path}" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_id" : p("req.id"),
+	"client_secret": p("req.secret"),
+	"correlationid": vars.id
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"accountid" : vars.accountid
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="ae5ed64b-33e9-45af-904a-7146a0bb55f0" message='#[vars.id]"flow started"' />
+		<error-handler ref="globalError_Handler" />
+    </flow>
+	</mule>

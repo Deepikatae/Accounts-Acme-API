@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_d8dff46b_6257_423c_9ea4_0694546e7144_Output_Variables_outboundHeaders = {| "content-type": String |}
+

@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="accounts-sfdc-sapi-suite.xml" />
+	<munit:test name="accounts-sfdc-sapi-main-test" doc:id="37ba816b-acc9-45c3-a290-1f9d3758651e" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="20460349-d768-48b7-8a51-b5c8d0cac354" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="41660d85-8f40-43f3-8136-0b68bee1b646" >
+				<munit:payload value="#[readUrl('classpath://accountssfdcsapimaintest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="de8d11e3-3075-4620-adc1-d2a2707b0fc1" name="accounts-sfdc-sapi-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="1e6a6ae1-d5c4-4658-9e90-a90ece302415" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-papi-console-test" doc:id="286116a5-16f2-4778-ad06-010772e8b496" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="48e837ef-2e7b-4d29-b6fd-9f46a7128e93" processor="apikit:console">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="accounts-sfdc-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="4a12434b-545d-4e87-a679-56434c75babd" >
+				<munit:payload value="#[readUrl('classpath://accountspapiconsoletest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://accountspapiconsoletest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-papi-console" doc:id="74409d66-b982-41e9-a967-708bccc77f02" name="accounts-papi-console"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="ece83423-7a14-48f1-8b02-97defca93714" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountspapiconsoletest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config-test" doc:id="200fcd15-256d-4819-a13c-a41d5e10b84f" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="87151a13-7856-4602-9c52-e8ab9167faf1" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config" doc:id="b38e5e83-7a53-453b-9b4e-4d5f281a2a88" name="put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="4ef5689b-2d06-4e45-befe-91169644b3b1" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Query1" doc:id="f4f26abd-7120-4aeb-9dd5-5dc4e5c9f35b" processor="salesforce:query" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4626cde1-ccd3-442a-9c7f-16c17b68acc1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<!-- [STUDIO:"post:\accounts:application\json:accounts-sfdc-sapi-config-test"]<munit:test name="post:\accounts:application\json:accounts-sfdc-sapi-config-test" doc:id="d48d2a80-a452-47ad-af0f-3914df8839e0" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="a1bea169-3485-4117-a354-74218276643f" >
+				<munit:payload value="#[output application/json  &#45;&#45;- readUrl('classpath://postaccountsapplicationjsonaccountssfdcsapiconfigtest\set-event_payload1.dwl')&#93;" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://postaccountsapplicationjsonaccountssfdcsapiconfigtest\set-event_attributes1.dwl')&#93;" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postaccountsapplicationjsonaccountssfdcsapiconfigtest\set-event_variable_1.dwl')&#93;" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\accounts:application\json:accounts-sfdc-sapi-config" doc:id="e6bd1446-c164-4d8c-8686-373bd30d2c00" name="post:\accounts:application\json:accounts-sfdc-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="7ba7235c-d305-4903-86c0-dc1651cc606c" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postaccountsapplicationjsonaccountssfdcsapiconfigtest::assert_expression_payload1
+&#45;&#45;-
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})&#93;&#93;&#93;></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Query" doc:id="86cbbe91-0f72-47c5-bfab-5c687ba87f5b" processor="salesforce:query" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="65cebbf4-f466-4665-ad7b-469128cca168" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test> [STUDIO] -->
+	<munit:test name="delete:\accounts\(accountid):accounts-sfdc-sapi-config-test" doc:id="7f65647b-e47c-4daf-a6a3-8ffa2813effa" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="c63fb3f0-4212-4ad8-8aaf-b230f5b80eb8" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://deleteaccountsaccountidaccountssfdcsapiconfigtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://deleteaccountsaccountidaccountssfdcsapiconfigtest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deleteaccountsaccountidaccountssfdcsapiconfigtest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\accounts\(accountid):accounts-sfdc-sapi-config" doc:id="607d462d-fb23-4bd9-95ac-d6a4bfe30cff" name="delete:\accounts\(accountid):accounts-sfdc-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="d621c0a7-482f-4ecc-b411-b89a2aff0edc" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deleteaccountsaccountidaccountssfdcsapiconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Delete" doc:id="93e87b15-44d5-4e4a-9862-79c47a2b65eb" processor="salesforce:delete" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d2eca8a5-231b-448b-805a-4526500d2c93" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\accounts\(accountid):accounts-sfdc-sapi-config-test" doc:id="f2d3c479-ddfa-4981-864a-48c57d83fc40" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="33e93c4c-a386-4ae4-b43c-4ae50ea1503a" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigtest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigtest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\accounts\(accountid):accounts-sfdc-sapi-config" doc:id="d817a3c4-4a94-4fd7-bfb0-e3d3d8f3dac6" name="get:\accounts\(accountid):accounts-sfdc-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="7d0e0718-4387-4f9b-b2c1-2571b993a7cf" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getaccountsaccountidaccountssfdcsapiconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Flow Reference" doc:id="3b2ef647-cf92-43aa-afb5-00e4513bc423" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4e341481-ffaf-4091-8979-bb948cb857f3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-test1" doc:id="b5f62932-f17e-4130-92ce-1360f560a736" expectedErrorType="APIKIT:ANY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="b09f6bd3-a80d-4b23-b886-01c40438941f" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:ANY" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="fca6632e-7d79-4eab-91ab-9916b7a825b8" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="75ec795e-e57f-4b95-b04c-6dd5686425f1" name="accounts-sfdc-sapi-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="d6bae1ce-1b1a-4b5d-b6ac-2a66b590118e" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:BAD_REQUEST" doc:id="f7af439a-3625-4338-9c46-a82f676fc55a" expectedErrorType="APIKIT:BAD_REQUEST" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="f14543d0-f8ad-4c15-afb4-3fffedbae0ca" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="fb9d7198-ade0-4765-acab-300da3bf3e0a" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="a83adcc0-97ab-4b35-abc0-a89cf539e037" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="b0ecc134-c50f-4297-8574-adc8fc0ceb3a" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:METHOD_NOT_ALLOWED" doc:id="658ff1cb-8069-4112-b2d7-f73fa63b0f63" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="97f7a05d-223d-4f5e-82e9-56c0fa7bda33" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="edf6e403-822c-40d8-a168-8766337949ef" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="ab90fe34-4294-4799-aaa1-8e92f3c9c087" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="d7ad8112-0000-465c-bf2b-ec26704902f3" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:NOT_ACCEPTABLE" doc:id="18a3cf35-11d3-409b-8562-1bc3a69c21c7" expectedErrorType="APIKIT:NOT_ACCEPTABLE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="343e2ddd-ad17-456a-bc7a-e0e66816d58b" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="4fc742ae-1baf-454b-9c6c-4e9ebe217411" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="9ed92564-80ea-4302-bd59-067123bfae29" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="40a2d558-70d7-4762-a5e8-158b8493811f" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:NOT_FOUND" doc:id="3ad42ee8-6bc6-4faa-ab65-4917533d8996" expectedErrorType="APIKIT:NOT_FOUND" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="aea64b54-d508-43d2-a770-ea24a58a4916" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="0bf05c66-9d41-4437-8b49-c4a3f4f6c11a" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="5d33a4ab-c1b8-4621-a70a-d051d69e24fc" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="dd5af0c7-319e-408e-8fd1-b264c09c74fe" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:NOT_IMPLEMENTED" doc:id="e1c2a864-a1b4-4231-9945-4a53fed0512f" expectedErrorType="APIKIT:NOT_IMPLEMENTED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="49563839-5d85-411b-9972-11d5aed296c9" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="47d389eb-420b-4950-b373-694d1fadcfc0" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="c167aa4e-619e-4ede-8e93-c4007a9836b5" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="980747be-dea1-4f4f-a2f4-e1467c1c04c8" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="accounts-sfdc-sapi-main-APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="f68495d1-0516-4960-9826-53291d9eef7d" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock APIkit Router" doc:id="726d1f57-18e5-4919-b129-19e34ff84f84" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9cc03153-16de-4815-8d70-ef6adbee04b1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="httpStatus" value="#[readUrl('classpath://accountssfdcsapimaintest1\mock_variable_1.dwl')]" />
+						<munit-tools:variable key="accountid" value="#[output application/java --- readUrl('classpath://accountssfdcsapimaintest1\mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="071f7182-51cb-4d4d-b842-b0c9583d85f3" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://accountssfdcsapimaintest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://accountssfdcsapimaintest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to accounts-sfdc-sapi-main" doc:id="e2b00234-66c9-49a5-9e4e-192fbc70fd01" name="accounts-sfdc-sapi-main" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="b71b6ad0-558d-4a7d-8bb8-4def697f62af" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import accountssfdcsapimaintest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config-test1" doc:id="6f48f757-0e68-457c-b03c-2a7fee3321a9" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="f5f34fb1-ff61-4500-a2e4-12083746476f" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest1\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest1\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config" doc:id="fb3e1b2a-81c9-4829-8509-9690207d93f7" name="put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="68f28852-ee96-4c19-9cba-4777d0243a7a" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putaccountsaccountidapplicationjsonaccountssfdcsapiconfigtest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Upsert" doc:id="d057d025-cc5e-45d8-8394-b7dbd798b1e9" processor="salesforce:upsert" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="46003aee-87ec-4eac-8dbc-28fecfa138c3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

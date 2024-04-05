@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="impl-get-suite.xml" />
+	<munit:test name="get:\accounts\(accountid):accounts-sfdc-sapi-config-impl-get-test" doc:id="508914f4-ccda-4dda-b53d-fc53161df9cc" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="eaea6e4a-1a7c-4ae2-a46b-dfb31f0c535d" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigimplgettest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:attributes value="#[readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigimplgettest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getaccountsaccountidaccountssfdcsapiconfigimplgettest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\accounts\(accountid):accounts-sfdc-sapi-config-impl-get" doc:id="a086855c-0152-43fe-8df9-331bd239b6c0" name="get:\accounts\(accountid):accounts-sfdc-sapi-config-impl-get"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="b1d4a4e4-24f6-4a26-b639-e43ffb36cf1b" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getaccountsaccountidaccountssfdcsapiconfigimplgettest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Query" doc:id="a63a3764-34b8-49c6-853d-2fa987d3e254" processor="salesforce:query" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3d607b5d-9a4d-4277-806d-0503cedf832e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

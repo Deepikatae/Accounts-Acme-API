@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+    <http:listener-config name="accounts-sfdc-sapi-httpListenerConfig">
+        <http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS" readTimeout="${https.timeout}" tlsContext="TLS_Context"/>
+    </http:listener-config>
+    <apikit:config name="accounts-sfdc-sapi-config" api="resource::a63ac463-c1e3-4eea-8f3c-128c5fa152aa:lm-account-sfdc-sapi:1.0.0:raml:zip:accounts-sfdc-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="d7df15cf-62da-4387-9c2c-b4af97b9a85f" >
+		<salesforce:basic-connection username="${sal.user}" password="${sal.pass}" securityToken="${sal.security}" url="${sal.url}" />
+	</salesforce:sfdc-config>
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="b4365310-63c0-4049-a82a-1876f6a256ff" >
+		<tls:key-store type="jks" path="${https.jkspath}" alias="${https.alias}" keyPassword="${secure::https.password}" password="${secure::https.password}" />
+	</tls:context>
+	<flow name="accounts-sfdc-sapi-main">
+        <http:listener config-ref="accounts-sfdc-sapi-httpListenerConfig" path="${https.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="attributes.headers.correlationid" doc:name="Set Variable for correlationid" doc:id="aa125b3c-cc1f-4e91-8312-de8c7894c33d" variableName="id"/>
+		<apikit:router config-ref="accounts-sfdc-sapi-config" doc:id="9cc03153-16de-4815-8d70-ef6adbee04b1"/>
+        <error-handler ref="lm-errorhandlingError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="accounts-papi-console">
+        <http:listener config-ref="accounts-sfdc-sapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accounts-sfdc-sapi-config" />
+        <error-handler ref="lm-errorhandlingError_Handler">
+        </error-handler>
+    </flow>
+    <flow name="put:\accounts\(accountid):application\json:accounts-sfdc-sapi-config">
+    <logger level="INFO" doc:name="Flow Started Logger" doc:id="c9abae0d-eaeb-46dc-b13f-a8c5cf353ff9" message='#[vars.id]"flow started"' />
+        <ee:transform doc:name="Set Variable">
+            <ee:variables>
+                <ee:set-variable variableName="accountid">attributes.uriParams.'accountid'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<!-- [STUDIO:"Query"]<salesforce:query doc:name="Query" doc:id="554ee472-f99c-48c7-926a-6e7583ff9eb0" config-ref="Salesforce_Config" target="response">
+			<salesforce:salesforce-query ><![CDATA[select AccountId__c from Account where Id = ':id'&#93;&#93;></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	"id" : vars.accountid
+}&#93;&#93;&#93;></salesforce:parameters>
+		</salesforce:query> [STUDIO] -->
+		<!-- [STUDIO:"Set Variable"]<set-variable value="#[vars.response.AccountId__c[0&#93;&#93;" doc:name="Set Variable" doc:id="10803e65-0b82-45aa-9a1a-b1724dd604ee" variableName="accountid"/> [STUDIO] -->
+		<salesforce:query doc:name="Query to get account details " doc:id="4626cde1-ccd3-442a-9c7f-16c17b68acc1" config-ref="Salesforce_Config" target="payload">
+			<salesforce:salesforce-query><![CDATA[select Name,Phone,Fax,Email__c,	AccountId__c,BillingAddress from Account where Id =':accountid__c']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	accountid__c : vars.accountid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="Choice" doc:id="0ba71c65-3105-48e9-abb2-fd273fdd7915" >
+			<when expression="#[sizeOf(vars.payload)&gt;0]">
+				<ee:transform doc:name="Mapping to update" doc:id="8053b643-cf52-4e93-ad68-2ec3b7bd9ecf">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	id: vars.accountid,
+	Name: payload.name,
+	BillingStreet: payload.billingAddress.street,
+	BillingCity: payload.billingAddress.city,
+	BillingState: payload.billingAddress.state,
+	BillingPostalCode: payload.billingAddress.postalCode,
+	BillingCountry: payload.billingAddress.country,
+	ShippingStreet: payload.shippingAddress.street,
+	ShippingCity: payload.shippingAddress.city,
+	ShippingState: payload.shippingAddress.state,
+	ShippingPostalCode: payload.shippingAddress.postalCode,
+	ShippingCountry: payload.shippingAddress.country,
+	Phone: payload.phone default "null",
+	Fax: payload.fax,
+	Number__c: payload.number,
+	Email__c: payload.email as String
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:upsert doc:name="Upsert data into Account saleforce" doc:id="46003aee-87ec-4eac-8dbc-28fecfa138c3" config-ref="Salesforce_Config" objectType="Account" externalIdFieldName="Id" />
+				<salesforce:query doc:name="Query" doc:id="071f2220-4922-4683-8a0d-ae5ab5707a71" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[select Id from Account where Id =':accountid__c']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	accountid__c : vars.accountid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+				<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: payload.Id[0],
+  status: 0,
+  message: "Account updated successfully"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Respones Message" doc:id="01c6a2e1-677e-4980-b26b-db82a1ac231f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "There is no data"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Response Logger" doc:id="159541d1-a04e-40c9-9a0d-c02df16940f6" message="#[payload]"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="03e15fe8-b22a-4b6a-9a64-d68c03e07198" message='#[vars.id]"flow started"' />
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+    <flow name="delete:\accounts\(accountid):accounts-sfdc-sapi-config">
+        <logger level="INFO" doc:name="Flow Started Logger" doc:id="95a92556-202a-4535-a768-b13cc30cb22e" message='#[vars.id]"flow started"' />
+		<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="accountid">attributes.uriParams.'accountid'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<!-- [STUDIO:"Query"]<salesforce:query doc:name="Query" doc:id="38df138a-e405-4f57-9e33-628d34a7bf30" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[select Name,Phone,Fax,Email__c,	AccountId__c,BillingAddress from Account where AccountId__c =':accountid__c'&#93;&#93;></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	accountid__c : vars.accountid
+}&#93;&#93;&#93;></salesforce:parameters>
+		</salesforce:query> [STUDIO] -->
+		<salesforce:delete doc:name="Delete account" doc:id="d2eca8a5-231b-448b-805a-4526500d2c93" config-ref="Salesforce_Config">
+			<salesforce:ids ><![CDATA[#[[attributes.uriParams.accountid]]]]></salesforce:ids>
+		</salesforce:delete>
+		<ee:transform doc:name="Response Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: 204,
+  message: "Account deleted successfully"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="de637d2e-8d8b-4bb9-b8d7-96852d5600ef" message='#[vars.id]"flow started"' />
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+    <flow name="get:\accounts\(accountid):accounts-sfdc-sapi-config">
+		<flow-ref doc:name="Flow Reference" doc:id="4e341481-ffaf-4091-8979-bb948cb857f3" name="get:\accounts\(accountid):accounts-sfdc-sapi-config-impl-get"/>
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+    <flow name="post:\accounts:application\json:accounts-sfdc-sapi-config">
+		<logger level="INFO" doc:name="Flow Started Logger" doc:id="a1777995-d5df-4109-ac88-26e668d21b98" message='#[vars.id]"flow started"' />
+		<set-variable value="#[payload.number as String]" doc:name="Set Variable for number" doc:id="cb7a57fd-91b9-49a9-9735-4541807b1d7d" variableName="num"/>
+		<ee:transform doc:name="Mapping" doc:id="08a811ff-2933-4301-8591-f6bc87d93aea">
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	BillingStreet: payload.billingAddress.street,
+	BillingCity: payload.billingAddress.city,
+	BillingState: payload.billingAddress.state,
+	BillingPostalCode: payload.billingAddress.postalCode default "null",
+	BillingCountry: payload.billingAddress.country,
+	ShippingStreet: payload.shippingAddress.street,
+	ShippingCity: payload.shippingAddress.city,
+	ShippingState: payload.shippingAddress.state,
+	ShippingPostalCode: payload.shippingAddress.postalCode,
+	ShippingCountry: payload.shippingAddress.country,
+	Phone: payload.phone,
+	Fax: payload.fax,
+	Number__c: payload.number,
+	Email__c: payload.email as String 
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="Create Account" doc:id="3644d542-04e3-41f6-a28e-40b911b0f338" config-ref="Salesforce_Config"/>
+		<salesforce:query doc:name="Query" doc:id="65cebbf4-f466-4665-ad7b-469128cca168" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select Id from Account where Number__c = ':num']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"num" : vars.num
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="7bc33f56-d83c-4e55-a096-05ff673df601">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.Id[0],
+	status: 201,
+	message: "Account created successfully"
+} as Object {
+	encoding: "UTF-8", mediaType: "application/json"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Flow Ended Logger" doc:id="c82a7242-8d83-49b9-b8d0-1b462c4ac726" message='#[vars.id]"flow started"' />
+		<error-handler ref="lm-errorhandlingError_Handler" />
+    </flow>
+</mule>
